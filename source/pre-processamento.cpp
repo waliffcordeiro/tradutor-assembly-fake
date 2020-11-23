@@ -1,6 +1,6 @@
 #include "../include/pre-processamento.hpp"
 
-void pre_processamento(string file) {
+vector<Linha> pre_processamento(string file) {
     
     vector<string> tokens;
     vector<string>::iterator it;
@@ -202,29 +202,9 @@ void pre_processamento(string file) {
                 linhas.push_back(*linhaObj);
             }
         }
-        // Salvando no Arquivo
-        ofstream saida(nome_arquivo+".pre"); // ofstream -> registro de arquivo, sai do programa e salva em arquivo
-        for(it_linha=linhas.begin(); it_linha != linhas.end(); it_linha++) {
-            Linha linha_refatorada = (Linha)*it_linha;
-            if(it_linha->rotulo != "") {
-                saida<<it_linha->rotulo<<" ";
-            }
-            if(it_linha->comando != "") {
-                saida<<it_linha->comando<<" ";
-            }
-            if(it_linha->operador1 != "") {
-                saida<<it_linha->operador1<<" ";
-            }
-            if(it_linha->operador2 != "") {
-                saida<<it_linha->operador2<<" ";
-            }
-            if(it_linha->rotulo != "" || it_linha->comando != "" || it_linha->operador1 != "" || it_linha->operador2 != "") {
-                // Se tiver pelo menos um elemento, printa a quebra de linha
-                saida<<endl; 
-            }
-        }
+
         entrada.close();
-        saida.close();
+        return linhas;
     } else {
         cout << "Não foi possível abrir o arquivo: "<< file <<endl; 
     }
