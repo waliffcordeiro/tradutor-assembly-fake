@@ -69,6 +69,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
     }
     /******************************/
 
+    /* COPY */
     else if(linha[0] == "LOAD") {
         if(linha.size() == 2) {
             linha_convertida = (string("MOV ") + acumulador + "[" + linha[1] + "]");
@@ -78,6 +79,34 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
         }
         final->push_back(linha_convertida);
     }
+    /******************************/
+
+    /* JMP */
+    else if(linha[0] == "JMP") {
+        if(linha.size() == 2) {
+            linha_convertida = (string("JMP " + linha[1]));
+        } else {
+            linha_convertida = (string("JMP " + linha[1] + linha[2] + linha[3]));
+        }
+        final->push_back(linha_convertida);
+    }
+    /******************************/
+
+    /* Jumps */
+    else if(linha[0] == "JMPN" || linha[0] == "JMPP" || linha[0] == "JMPZ") {
+        string jump = linha[0] + " ";
+        string linha_aux;
+        if(linha.size() == 2) {
+            linha_aux = (string("CMP ") + acumulador + string("0"));
+            linha_convertida = jump + linha[1];
+        } else {
+            linha_aux = (string("CMP ") + acumulador + string("0"));
+            linha_convertida = jump + linha[1] + linha[2] + linha[3];
+        }
+        final->push_back(linha_aux);
+        final->push_back(linha_convertida);
+    }
+    /******************************/    
 
 }
 
