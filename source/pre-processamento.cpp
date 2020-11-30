@@ -1,7 +1,7 @@
 #include "../include/pre-processamento.hpp"
 
-vector<Linha> pre_processamento(string file) {
-    
+vector<Linha> pre_processamento(string file, vector<string> *bss, vector<string> *data) {
+
     vector<string> tokens;
     vector<string>::iterator it;
 
@@ -22,10 +22,16 @@ vector<Linha> pre_processamento(string file) {
     if(entrada.is_open()) {
         // Pegando linha a linha
         while(getline(entrada, linha)) {
+
+            if(linha == "") {
+                continue; // Linha vazia
+            }
+
             // Separa todos os tokens em um vector de string retirando espaços e tabulações
             tokens = split(linha, ' ', '\t');
 
-            if(tokens.size() == 1) { // Só um token. É comando, label ou IF 
+
+            if(tokens.size() == 1) { // Só um token. É comando ou label
                 if (tokens[0].front() == ';') { // Ignorando comentário
                     continue;
                 }
@@ -34,7 +40,7 @@ vector<Linha> pre_processamento(string file) {
                     string elemento = tokens[0]; // Salva a label ou EQU
                     string label = tokens[0];
 
-                    // Pegamos a linha seguinte
+                    // Lendo a linha seguinte da label 
                     if (getline(entrada, linha)) { // Evitar ler o fim do arquivo
                         tokens = split(linha, ' ', '\t'); // Retira espaços e tabulações
 
@@ -49,6 +55,7 @@ vector<Linha> pre_processamento(string file) {
                                     // Garantindo que tem os 2 tokens (EQU e valor)
                                     equ->setValor(tokens[1]);
                                     EQUs.push_back(*equ);
+                                    continue;
                                 }
                                 else { // Verificando quantidade de argumentos no EQU
                                     cout << "Erro sintático. O EQU referente ao " << elemento << " foi definido com quantidade não permitida de parâmetros. Utilize apenas um parâmetro."<<endl;
@@ -87,8 +94,8 @@ vector<Linha> pre_processamento(string file) {
                                         }
                                     }
                                 }
+                                contador++;
                             }
-                            contador++;
                             linhas.push_back(*linhaObj);                
                         } 
                     }               
@@ -97,15 +104,11 @@ vector<Linha> pre_processamento(string file) {
                     Linha *linhaObj = new Linha("", tokens[0], "", "");
                     linhas.push_back(*linhaObj);
                 }
-            }
-            else { // Linha comum 
+            } else { // Linha comum 
 
                 // Verificar se é EQU
                 isEQU = toUpperCase(tokens[1]);
                 if(isEQU == "EQU" && tokens.size() != 3) {
-                    tokens[0].pop_back();
-                    string elemento = tokens[0];
-                    cout << "Erro sintático. O EQU referente ao " << elemento << " foi definido com quantidade não permitida de parâmetros. Utilize apenas um parâmetro."<<endl;
                     continue;
                 }
 
@@ -118,6 +121,13 @@ vector<Linha> pre_processamento(string file) {
                         string section = tokens[0]+" "+tokens[1];
                         linhaObj->set("", section, "", "");
                     } else if (isElemento == "IF") {
+                        if(tokens[1] == "1") {
+                            continue; // A próxima linha é permitida
+                        } else if(tokens[1] == "0") {
+                            // Se o valor é False, ignora a linha (lê e volta pro início do código para uma nova leitura)
+                            getline(entrada, linha);
+                            continue;
+                        }
                         int qtd_EQUs = 1;
                         for(it_equ=EQUs.begin(); it_equ != EQUs.end(); it_equ++) {
                             // Verificando "chave/valor" do EQU
@@ -161,6 +171,7 @@ vector<Linha> pre_processamento(string file) {
                     EQU *equ = new EQU(tokens[0], tokens[2]);
                     if(equ->EQU_unico(EQUs)) {
                         EQUs.push_back(*equ);
+                        continue;
                     }
                 } else { // Linha comum com 3 ou 4 componentes
                     
@@ -204,6 +215,84 @@ vector<Linha> pre_processamento(string file) {
         }
 
         entrada.close();
+
+        /* Separando BSS, DATA e TEXT */
+        for(it_linha=linhas.begin(); it_linha != linhas.end(); it_linha++) {
+            if (it_linha->comando == "SECTION DATA") {
+                linhas.erase(it_linha);
+                it_linha--;
+                continue;
+            }
+            if (it_linha->rotulo == "SPACE") {
+                string palavra;
+                palavra += it_linha->rotulo + "";
+                if(it_linha->comando != "") {
+                    palavra += it_linha->comando + " ";
+                }
+                if(it_linha->operador1 != "") {
+                    palavra += it_linha->operador1 + " ";
+                }
+                if(it_linha->operador2 != "") {
+                    palavra += it_linha->operador2;
+                }
+                bss->push_back(palavra);
+                linhas.erase(it_linha);
+                it_linha--;
+            } else if(it_linha->comando == "SPACE") {
+                string palavra;
+                if(it_linha->rotulo != "") {
+                    palavra += it_linha->rotulo + " ";
+                }
+                palavra += it_linha->comando + " ";
+                if(it_linha->operador1 != "") {
+                    palavra += it_linha->operador1 + " ";
+                }
+                if(it_linha->operador2 != "") {
+                    palavra += it_linha->operador2;
+                }
+                bss->push_back(palavra);
+                linhas.erase(it_linha);
+                it_linha--;
+            } else if (it_linha->rotulo == "CONST") {
+                string palavra;
+                palavra += it_linha->rotulo + " ";
+                if(it_linha->comando != "") {
+                    palavra += it_linha->comando + " ";
+                }
+                if(it_linha->operador1 != "") {
+                    palavra += it_linha->operador1 + " ";
+                }
+                if(it_linha->operador2 != "") {
+                    palavra += it_linha->operador2;
+                }
+                data->push_back(palavra);
+                linhas.erase(it_linha);
+                it_linha--;
+            } else if(it_linha->comando == "CONST") {
+                string palavra;
+                if(it_linha->rotulo != "") {
+                    palavra += it_linha->rotulo + " ";
+                }
+                palavra += it_linha->comando + " ";
+                if(it_linha->operador1 != "") {
+                    palavra += it_linha->operador1 + " ";
+                }
+                if(it_linha->operador2 != "") {
+                    palavra += it_linha->operador2;
+                }
+                data->push_back(palavra);
+                linhas.erase(it_linha);
+                it_linha--;
+            } else if (it_linha->operador1 == "SPACE") {
+                string palavra;
+                palavra += it_linha->comando + " ";
+                palavra += it_linha->operador1 + " 1";
+                bss->push_back(palavra);
+                linhas.erase(it_linha);
+                it_linha--;
+            }
+        }   
+        /**************************************/
         return linhas;
     } else {
         cout << "Não foi possível abrir o arquivo: "<< file <<endl; 
