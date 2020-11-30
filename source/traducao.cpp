@@ -30,6 +30,15 @@ string metodo_equivalente(vector<string> linha) {
              linha[1] + linha[2] + linha[3] + string("]"));
         }
     }
+    else if(linha[0] == "SUB") {
+        if(linha.size() == 2)
+            linha_convertida = (string("SUB ") + string("EBX, ") + string("[") +
+            linha[1] + "]");
+        else {
+            linha_convertida = (string("SUB ") + string("EBX, ") + string("[") +
+            linha[1] + linha[2] + linha[3] + string("]"));
+        } 
+    }
 
 
     return linha_convertida;
