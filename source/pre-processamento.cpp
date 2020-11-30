@@ -1,6 +1,6 @@
 #include "../include/pre-processamento.hpp"
 
-vector<Linha> pre_processamento(string file, vector<string> *bss, vector<string> *data) {
+string pre_processamento(string file, vector<string> *text, vector<string> *bss, vector<string> *data) {
 
     vector<string> tokens;
     vector<string>::iterator it;
@@ -67,6 +67,7 @@ vector<Linha> pre_processamento(string file, vector<string> *bss, vector<string>
                             Linha *linhaObj = new Linha(label, "", "", "");
 
                             int contador = 0;
+                            bool muitosArgumentos = false;
                             for(it=tokens.begin(); it != tokens.end(); it++) { // Iterando a linha complementar à label
                                 string word = (string)*it;
                                 if(word[0] == ';') { // Ignorando comentários
@@ -93,6 +94,13 @@ vector<Linha> pre_processamento(string file, vector<string> *bss, vector<string>
                                             linhaObj->setOperador2(it_equ->valor);
                                         }
                                     }
+                                    if(*it == "+"){
+                                        muitosArgumentos = true;
+                                    }
+                                }
+                                // Caso que tem argumento na label e comando grande
+                                if(contador == 3 and muitosArgumentos) {
+                                    linhaObj->setOperador2(*it);
                                 }
                                 contador++;
                             }
@@ -178,6 +186,7 @@ vector<Linha> pre_processamento(string file, vector<string> *bss, vector<string>
                     linhaObj->set("", "", "", "");
                     
                     int contador = 0;
+                    bool muitosArgumentos = false;
                     for(it=tokens.begin(); it != tokens.end(); it++) {
                         string word = (string)*it;
                         if(word[0] == ';') { // Ignorando os comentários
@@ -205,8 +214,13 @@ vector<Linha> pre_processamento(string file, vector<string> *bss, vector<string>
                                     linhaObj->setOperador2(it_equ->valor);
                                 }
                             }
+                            if(*it == "+") {
+                                muitosArgumentos = true;
+                            }
                         }
-                        
+                        if(contador == 4 and muitosArgumentos) {
+                            linhaObj->setOperador2(*it);
+                        }
                         contador++;
                     }         
                 }
@@ -293,7 +307,35 @@ vector<Linha> pre_processamento(string file, vector<string> *bss, vector<string>
             }
         }   
         /**************************************/
-        return linhas;
+        /*********** Section Text *************/
+        for(it_linha=linhas.begin(); it_linha != linhas.end(); it_linha++) {
+            string palavra;
+            if(it_linha->comando == "SECTION TEXT") {
+                linhas.erase(it_linha);
+                it_linha--;
+                continue;
+            } else {
+                if (it_linha->rotulo != "") {
+                    palavra += it_linha->rotulo + " ";
+                }
+                if (it_linha->comando != "") {
+                    palavra += it_linha->comando + " ";
+                }
+                if (it_linha->operador1 != "") {
+                    palavra += it_linha->operador1 + " ";
+                }
+                if (it_linha->operador2 != "") {
+                    if(it_linha->rotulo == "COPY" or it_linha->comando == "COPY") {
+                        palavra += "+ " + it_linha->operador2;
+                    } else {
+                        palavra += it_linha->operador2 + " ";
+                    }
+                }
+                text->push_back(palavra);
+            }
+        }
+        /**************************************/
+        return nome_arquivo;
     } else {
         cout << "Não foi possível abrir o arquivo: "<< file <<endl; 
     }
