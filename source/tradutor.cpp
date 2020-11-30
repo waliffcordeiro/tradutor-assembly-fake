@@ -10,8 +10,6 @@ using namespace std;
 
 int main(int argc, char **argv) {
 
-    vector<Linha> linhas;
-    vector<Linha>::iterator it_linha;
     vector<string> bss, data, text, traduzido;
     string nome_arquivo;
 
