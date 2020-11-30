@@ -29,7 +29,15 @@ string pre_processamento(string file, vector<string> *text, vector<string> *bss,
 
             // Separa todos os tokens em um vector de string retirando espaços e tabulações
             tokens = split(linha, ' ', '\t');
-
+            
+            if(tokens.size() > 6) { // copy com muitos argumentos
+                Linha *linhaObj = new Linha("", "", "", "");
+                linhaObj->setComando(tokens[0]);
+                linhaObj->setOperador1(tokens[1]+tokens[2]+tokens[3]);   
+                linhaObj->setOperador2(tokens[4]+tokens[5]+tokens[6]);
+                linhas.push_back(*linhaObj);
+                continue;
+            }
 
             if(tokens.size() == 1) { // Só um token. É comando ou label
                 if (tokens[0].front() == ';') { // Ignorando comentário
@@ -100,7 +108,7 @@ string pre_processamento(string file, vector<string> *text, vector<string> *bss,
                                 }
                                 // Caso que tem argumento na label e comando grande
                                 if(contador == 3 and muitosArgumentos) {
-                                    linhaObj->setOperador2(*it);
+                                    linhaObj->setOperador2("+ "+*it);
                                 }
                                 contador++;
                             }
@@ -182,6 +190,21 @@ string pre_processamento(string file, vector<string> *text, vector<string> *bss,
                         continue;
                     }
                 } else { // Linha comum com 3 ou 4 componentes
+
+                    if(tokens[0] == "COPY" and tokens.size() == 5) {
+                        Linha *linhaObj = new Linha("", "", "", "");
+                        if(tokens[2] == "+") { // Label + arg antes da virgula
+                            linhaObj->setComando(tokens[0]);                          
+                            linhaObj->setOperador1(tokens[1]+tokens[2]+tokens[3]);   
+                            linhaObj->setOperador2(tokens[4]);
+                        } else { // Label + arg depois da virgula
+                            linhaObj->setComando(tokens[0]);
+                            linhaObj->setOperador1(tokens[1]);   
+                            linhaObj->setOperador2(tokens[2]+tokens[3]+tokens[4]);
+                        }
+                        linhas.push_back(*linhaObj);
+                        continue;
+                    }
                     
                     linhaObj->set("", "", "", "");
                     
@@ -219,7 +242,7 @@ string pre_processamento(string file, vector<string> *text, vector<string> *bss,
                             }
                         }
                         if(contador == 4 and muitosArgumentos) {
-                            linhaObj->setOperador2(*it);
+                            linhaObj->setOperador2("+"+*it);
                         }
                         contador++;
                     }         
@@ -230,7 +253,7 @@ string pre_processamento(string file, vector<string> *text, vector<string> *bss,
 
         entrada.close();
 
-        /* Separando BSS, DATA e TEXT */
+        /* Separando BSS e DATA*/
         for(it_linha=linhas.begin(); it_linha != linhas.end(); it_linha++) {
             if (it_linha->comando == "SECTION DATA") {
                 linhas.erase(it_linha);
@@ -325,11 +348,7 @@ string pre_processamento(string file, vector<string> *text, vector<string> *bss,
                     palavra += it_linha->operador1 + " ";
                 }
                 if (it_linha->operador2 != "") {
-                    if(it_linha->rotulo == "COPY" or it_linha->comando == "COPY") {
-                        palavra += "+ " + it_linha->operador2;
-                    } else {
-                        palavra += it_linha->operador2 + " ";
-                    }
+                    palavra += it_linha->operador2 + " ";
                 }
                 text->push_back(palavra);
             }
