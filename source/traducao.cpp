@@ -14,7 +14,6 @@ vector<string> traducao(vector<string> *text, vector<string> *bss, vector<string
         metodo_equivalente(split(linha, ' ', '\t'), &linhas_traduzidas);
         
     }
-
     return linhas_traduzidas;
 }
 
@@ -31,7 +30,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
             linha_convertida = (string("ADD ") + acumulador + string("[") +
              linha[1] + linha[2] + linha[3] + string("]"));
         }
-        final->push_back(linha_convertida);
+        final->push_back(toUpperCase(linha_convertida));
     }
     /******************************/
 
@@ -44,7 +43,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
             linha_convertida = (string("SUB ") + acumulador + string("[") +
             linha[1] + linha[2] + linha[3] + string("]"));
         } 
-        final->push_back(linha_convertida);
+        final->push_back(toUpperCase(linha_convertida));
     } 
     /******************************/
 
@@ -56,7 +55,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
             linha_convertida = (string("MOV ") + acumulador + string("[") + 
             linha[1] + linha[2] + linha[3] + string("]"));
         }
-        final->push_back(linha_convertida);
+        final->push_back(toUpperCase(linha_convertida));
     }
     /******************************/
 
@@ -65,7 +64,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
         linha[1].pop_back(); // retirando a vírgula
         linha_convertida = (string("MOV ") + string("[") + 
         linha[1] + "]" + string(", ") + "[" + linha[2] + "]");
-        final->push_back(linha_convertida);
+        final->push_back(toUpperCase(linha_convertida));
     }
     /******************************/
 
@@ -77,7 +76,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
             linha_convertida = (string("MOV ") + acumulador + "[" + linha[1] +
             linha[2] + linha[3] + "]");
         }
-        final->push_back(linha_convertida);
+        final->push_back(toUpperCase(linha_convertida));
     }
     /******************************/
 
@@ -88,7 +87,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
         } else {
             linha_convertida = (string("JMP " + linha[1] + linha[2] + linha[3]));
         }
-        final->push_back(linha_convertida);
+        final->push_back(toUpperCase(linha_convertida));
     }
     /******************************/
 
@@ -103,10 +102,37 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
             linha_aux = (string("CMP ") + acumulador + string("0"));
             linha_convertida = jump + linha[1] + linha[2] + linha[3];
         }
-        final->push_back(linha_aux);
-        final->push_back(linha_convertida);
+        final->push_back(toUpperCase(linha_aux));
+        final->push_back(toUpperCase(linha_convertida));
     }
     /******************************/    
+
+    /* DIV */
+    else if(linha[0] == "DIV") {
+        vector<string> linha_aux;
+        acumulador.pop_back();
+        acumulador.pop_back();
+        linha_aux.push_back(string("MOV EAX, ") + acumulador);
+        linha_aux.push_back(string("CDQ"));
+        linha_aux.push_back(string("IDIV ") + linha[1]);
+        final->push_back(toUpperCase(linha_aux[0]));
+        final->push_back(toUpperCase(linha_aux[1]));
+        final->push_back(toUpperCase(linha_aux[2]));
+    }
+    /******************************/
+
+    /* MUL */
+    else if(linha[0] == "MUL") {
+        vector<string> linha_aux;
+        acumulador.pop_back();
+        acumulador.pop_back();
+        linha_aux.push_back(string("MOV EAX, ") + acumulador);
+        linha_aux.push_back(string("IMUL ") + linha[1]);
+        final->push_back(toUpperCase(linha_aux[0]));
+        final->push_back(toUpperCase(linha_aux[1]));
+        /* TODO Tratar Overflow*/
+    }
+    /******************************/
 
 }
 
