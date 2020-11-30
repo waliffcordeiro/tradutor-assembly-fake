@@ -3,6 +3,6 @@
 
 #include "classes.hpp"
 
-vector<Linha> pre_processamento(string file);
+vector<Linha> pre_processamento(string file, vector<string> *bss, vector<string> *data);
 
 #endif /* PRE_PROCESSAMENTO_H */
