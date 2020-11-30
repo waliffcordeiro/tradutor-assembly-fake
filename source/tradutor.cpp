@@ -11,8 +11,9 @@ int main(int argc, char **argv) {
 
     vector<Linha> linhas;
     vector<Linha>::iterator it_linha;
+    vector<string> bss, data;
 
-    linhas = pre_processamento(argv[1]);
+    linhas = pre_processamento(argv[1], &bss, &data);
 
     for(it_linha=linhas.begin(); it_linha != linhas.end(); it_linha++) {
         Linha linha_refatorada = (Linha)*it_linha;
