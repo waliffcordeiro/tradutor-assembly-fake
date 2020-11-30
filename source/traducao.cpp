@@ -95,6 +95,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
     else if(linha[0] == "JMPN" || linha[0] == "JMPP" || linha[0] == "JMPZ") {
         
         string jump, linha_aux;
+        linha_aux = (string("CMP ") + acumulador + string("0"));
 
         if(linha[0] == "JMPN") 
             jump = "JL ";
@@ -104,12 +105,11 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
             jump = "JE ";
 
         if(linha.size() == 2) {
-            linha_aux = (string("CMP ") + acumulador + string("0"));
             linha_convertida = jump + linha[1];
         } else {
-            linha_aux = (string("CMP ") + acumulador + string("0"));
             linha_convertida = jump + linha[1] + linha[2] + linha[3];
         }
+        
         final->push_back(toUpperCase(linha_aux));
         final->push_back(toUpperCase(linha_convertida));
     }
