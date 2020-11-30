@@ -1,5 +1,6 @@
 #include "../include/classes.hpp"
 #include "../include/pre-processamento.hpp"
+#include "../include/traducao.hpp"
 
 
 // Waliff Cordeiro Bandeira - 17/0115810
@@ -11,29 +12,16 @@ int main(int argc, char **argv) {
 
     vector<Linha> linhas;
     vector<Linha>::iterator it_linha;
-    vector<string> bss, data;
+    vector<string> bss, data, text, traduzido;
+    string nome_arquivo;
 
-    linhas = pre_processamento(argv[1], &bss, &data);
+    nome_arquivo = pre_processamento(argv[1], &text, &bss, &data);
 
-    for(it_linha=linhas.begin(); it_linha != linhas.end(); it_linha++) {
-        Linha linha_refatorada = (Linha)*it_linha;
-        if(it_linha->rotulo != "") {
-            cout << it_linha->rotulo<<" ";
-        }
-        if(it_linha->comando != "") {
-            cout << it_linha->comando<<" ";
-        }
-        if(it_linha->operador1 != "") {
-            cout << it_linha->operador1<<" ";
-        }
-        if(it_linha->operador2 != "") {
-            cout << it_linha->operador2<<" ";
-        }
-        if(it_linha->rotulo != "" || it_linha->comando != "" || it_linha->operador1 != "" || it_linha->operador2 != "") {
-            // Se tiver pelo menos um elemento, printa a quebra de linha
-            cout << endl; 
-        }
-    }
+    traduzido = traducao(&text, &bss, &data);
+
+    print_traducao(traduzido, (nome_arquivo + ".s"));
+
+    cout << "breakpoint";
         
     return 0;
 }
