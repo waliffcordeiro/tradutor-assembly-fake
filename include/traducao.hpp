@@ -9,4 +9,6 @@ void metodo_equivalente(vector<string> linha, vector<string> *final);
 
 void print_traducao(vector<string> traducao, string nome_arquivo, vector<string> *bss, vector<string> *data);
 
+string input_output();
+
 #endif /* TRADUCAO_H */
