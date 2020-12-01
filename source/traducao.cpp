@@ -1,7 +1,38 @@
 #include "../include/traducao.hpp"
 
 
-vector<string> traducao(vector<string> *text, vector<string> *bss, vector<string> *data) {
+void print_traducao(vector<string> traducao, string nome_arquivo, vector<string> *bss, vector<string> *data) {
+    
+    ofstream saida(nome_arquivo);
+    
+    /* Funções Assembly */
+
+    saida << endl;
+    /* Section Data */
+    saida << "SECTION .DATA" << endl;
+    vector<string> palavras_data;
+    for(auto linha: *data) {
+        palavras_data = split(linha, ' ', '\t');
+        palavras_data[0].pop_back(); // Retirando :
+        saida << palavras_data[0] + " DD " + palavras_data[2] << endl; 
+    }
+    
+    saida << endl;
+    /* Section Bss */
+    saida << "SECTION .BSS" << endl;
+    vector<string> palavras_bss;
+    for(auto linha: *bss) {
+        palavras_bss = split(linha, ' ', '\t');
+        palavras_bss[0].pop_back(); // Retirando :
+        saida << palavras_bss[0] + " RESB " + palavras_bss[2] << endl; 
+    }
+
+    /* Section Text */
+
+    saida.close();
+}
+
+vector<string> traducao(vector<string> *text) {
     vector<string> linhas_traduzidas;
     string aux_linha;
 
@@ -11,8 +42,7 @@ vector<string> traducao(vector<string> *text, vector<string> *bss, vector<string
 
     /* Section Text */
     for(auto linha:*text) {
-        metodo_equivalente(split(linha, ' ', '\t'), &linhas_traduzidas);
-        
+        metodo_equivalente(split(linha, ' ', '\t'), &linhas_traduzidas);    
     }
     return linhas_traduzidas;
 }
@@ -109,7 +139,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
         } else {
             linha_convertida = jump + linha[1] + linha[2] + linha[3];
         }
-        
+
         final->push_back(toUpperCase(linha_aux));
         final->push_back(toUpperCase(linha_convertida));
     }
@@ -120,9 +150,9 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
         vector<string> linha_aux;
         acumulador.pop_back();
         acumulador.pop_back();
-        linha_aux.push_back(string("MOV EAX, ") + acumulador);
+        linha_aux.push_back(string("MOV EAX, ") + string("[") + linha[1] + string("]"));
         linha_aux.push_back(string("CDQ"));
-        linha_aux.push_back(string("IDIV ") + linha[1]);
+        linha_aux.push_back(string("IDIV ") + acumulador);
         final->push_back(toUpperCase(linha_aux[0]));
         final->push_back(toUpperCase(linha_aux[1]));
         final->push_back(toUpperCase(linha_aux[2]));
@@ -132,26 +162,32 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
     /* MUL */
     else if(linha[0] == "MUL") {
         vector<string> linha_aux;
+        acumulador.pop_back(); // Retirando,
         acumulador.pop_back();
-        acumulador.pop_back();
-        linha_aux.push_back(string("MOV EAX, ") + acumulador);
-        linha_aux.push_back(string("IMUL ") + linha[1]);
+
+        // Salvando 0 no EDX para verificar overflow
+        // linha_aux.push_back(string("MOV EDX, 0"));
+
+        linha_aux.push_back(string("MOV EAX, ") + string("[") + linha[1] + string("]"));
+        linha_aux.push_back(string("IMUL ") + acumulador);
+        
+        final->push_back(toUpperCase(linha_aux[0]));
+        final->push_back(toUpperCase(linha_aux[1]));
+
+        // TO DO Overflow
+    }
+    /******************************/
+
+    /* STOP */
+    else if(linha[0] == "STOP") {
+        vector<string> linha_aux;
+        linha_aux.push_back(string("MOV EAX, 1"));
+        linha_aux.push_back(string("INT 80h"));
         final->push_back(toUpperCase(linha_aux[0]));
         final->push_back(toUpperCase(linha_aux[1]));
         /* TODO Tratar Overflow*/
     }
     /******************************/
 
-}
-
-void print_traducao(vector<string> traducao, string nome_arquivo) {
-    
-    /* Funções Assembly */
-
-    /* Section Data */
-    
-    /* Section Bss */
-
-    /* Section Text */
 
 }

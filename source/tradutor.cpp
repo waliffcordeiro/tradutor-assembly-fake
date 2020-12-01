@@ -15,11 +15,9 @@ int main(int argc, char **argv) {
 
     nome_arquivo = pre_processamento(argv[1], &text, &bss, &data);
 
-    traduzido = traducao(&text, &bss, &data);
+    traduzido = traducao(&text);
 
-    print_traducao(traduzido, (nome_arquivo + ".s"));
+    print_traducao(traduzido, (nome_arquivo + ".s"), &bss, &data);
 
-    cout << "breakpoint";
-        
     return 0;
 }
