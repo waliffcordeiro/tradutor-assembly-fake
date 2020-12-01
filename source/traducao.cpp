@@ -4,12 +4,14 @@
 void print_traducao(vector<string> traducao, string nome_arquivo, vector<string> *bss, vector<string> *data) {
     
     ofstream saida(nome_arquivo);
-    
+
+    saida << "global _start" << endl;
+
     /* Funções Assembly */
 
     saida << endl;
     /* Section Data */
-    saida << "SECTION .DATA" << endl;
+    saida << "section .data" << endl;
     vector<string> palavras_data;
     for(auto linha: *data) {
         palavras_data = split(linha, ' ', '\t');
@@ -19,7 +21,7 @@ void print_traducao(vector<string> traducao, string nome_arquivo, vector<string>
     
     saida << endl;
     /* Section Bss */
-    saida << "SECTION .BSS" << endl;
+    saida << "section .bss" << endl;
     vector<string> palavras_bss;
     for(auto linha: *bss) {
         palavras_bss = split(linha, ' ', '\t');
@@ -27,9 +29,39 @@ void print_traducao(vector<string> traducao, string nome_arquivo, vector<string>
         saida << palavras_bss[0] + " RESB " + palavras_bss[2] << endl; 
     }
 
+    saida << endl;
     /* Section Text */
+    saida << "section .text" << endl;
+    saida << "_start:" << endl << endl;
 
-    saida.close();
+    for(auto linha_traduzida: traducao) {
+        saida << linha_traduzida + "\n";
+    }
+
+    saida << endl << endl;
+    saida << input_output();
+}
+
+string input_output() {
+    return (string("LerChar:\n") +
+    string("enter 0,0\n") +
+    string("mov eax, 3 ; Código de leitura \n") +
+    string("mov ebx, 0 ; STDIN\n") +
+    string("mov ecx, [EBP + 8]; Ponteiro baseado na pilha (parâmetro por push)\n") +
+    string("mov edx, 1 ; Tamanho em Bytes\n") +
+    string("int 80h\n") +
+    string("leave\n") +
+    string("ret 4\n\n") +
+
+    string("EscreverChar:\n") +
+    string("enter 0,0\n") +
+    string("mov eax, 4 ; Código de escrita\n") +
+    string("mov ebx, 1\n") +
+    string("mov ecx, [EBP + 8]; Ponteiro baseado na pilha (parâmetro por push)\n") +
+    string("mov edx, 1 ; Tamanho em Bytes\n") + 
+    string("int 80h\n") +
+    string("leave\n") +
+    string("ret 4\n"));
 }
 
 vector<string> traducao(vector<string> *text) {
@@ -123,7 +155,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
 
     /* Jumps */
     else if(linha[0] == "JMPN" || linha[0] == "JMPP" || linha[0] == "JMPZ") {
-        
+        // Fazer ADD para jump com offset
         string jump, linha_aux;
         linha_aux = (string("CMP ") + acumulador + string("0"));
 
@@ -188,6 +220,28 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
         /* TODO Tratar Overflow*/
     }
     /******************************/
+
+    /* Input e Output de char */
+    else if(linha[0] == "C_INPUT") { // Input Char
+        vector<string> linha_aux;
+        // TO DO add no endereço
+        if(linha.size() == 2) {
+            linha_aux.push_back(string("push ") + linha[1]);
+            linha_aux.push_back(string("CALL LerChar "));
+            final->push_back(toUpperCase(linha_aux[0]));
+            final->push_back(linha_aux[1]);
+        }
+    }
+    else if(linha[0] == "C_OUTPUT") { // Ouput Char
+        vector<string> linha_aux;
+        // TO DO add no endereço
+        if(linha.size() == 2) {
+            linha_aux.push_back(string("push ") + linha[1]);
+            linha_aux.push_back(string("CALL EscreverChar "));
+            final->push_back(toUpperCase(linha_aux[0]));
+            final->push_back(linha_aux[1]);
+        }
+    }
 
 
 }
