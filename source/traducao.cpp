@@ -43,25 +43,48 @@ void print_traducao(vector<string> traducao, string nome_arquivo, vector<string>
 }
 
 string input_output() {
-    return (string("LerChar:\n") +
-    string("enter 0,0\n") +
-    string("mov eax, 3 ; Código de leitura \n") +
-    string("mov ebx, 0 ; STDIN\n") +
-    string("mov ecx, [EBP + 8]; Ponteiro baseado na pilha (parâmetro por push)\n") +
-    string("mov edx, 1 ; Tamanho em Bytes\n") +
-    string("int 80h\n") +
-    string("leave\n") +
-    string("ret 4\n\n") +
+    return (
+        string("LerChar:\n") +
+        string("enter 0,0\n") +
+        string("mov eax, 3 ; Código de leitura \n") +
+        string("mov ebx, 0 ; STDIN\n") +
+        string("mov ecx, [EBP + 8]; Ponteiro baseado na pilha (parâmetro por push)\n") +
+        string("mov edx, 1 ; Tamanho em Bytes\n") +
+        string("int 80h\n") +
+        string("leave\n") +
+        string("ret 4\n\n") +
 
-    string("EscreverChar:\n") +
-    string("enter 0,0\n") +
-    string("mov eax, 4 ; Código de escrita\n") +
-    string("mov ebx, 1\n") +
-    string("mov ecx, [EBP + 8]; Ponteiro baseado na pilha (parâmetro por push)\n") +
-    string("mov edx, 1 ; Tamanho em Bytes\n") + 
-    string("int 80h\n") +
-    string("leave\n") +
-    string("ret 4\n"));
+        string("EscreverChar:\n") +
+        string("enter 0,0\n") +
+        string("mov eax, 4 ; Código de escrita\n") +
+        string("mov ebx, 1\n") +
+        string("mov ecx, [EBP + 8]; Ponteiro baseado na pilha (parâmetro por push)\n") +
+        string("mov edx, 1 ; Tamanho em Bytes\n") + 
+        string("int 80h\n") +
+        string("leave\n") +
+        string("ret 4\n\n") +
+
+        string("LerString:\n") +
+        string("enter 0,0\n") +
+        string("mov eax, 3\n") +
+        string("mov ebx, 0\n") +
+        string("mov ecx, [EBP + 12]\n") +
+        string("mov edx, [EBP + 8]\n") +
+        string("int 80h\n") +
+        string("leave\n") +
+        string("ret 8\n\n") +
+
+        string("EscreverString:\n") +
+        string("enter 0,0\n") +
+        string("mov eax, 4\n") +
+        string("mov ebx, 1\n") +
+        string("mov ecx, [EBP + 12]\n") +
+        string("mov edx, [EBP + 8]\n") +
+        string("int 80h\n") +
+        string("leave\n") +
+        string("ret 8")
+    
+    );
 }
 
 vector<string> traducao(vector<string> *text) {
@@ -242,6 +265,36 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
             final->push_back(linha_aux[1]);
         }
     }
+    /******************************/
+
+    /* Input e Output de string */
+    else if(linha[0] == "S_INPUT") { // Input string
+        vector<string> linha_aux;
+        // TO DO add no endereço
+        if(linha.size() == 3) {
+            linha[1].pop_back(); // Retirando a vírgula
+            linha_aux.push_back(string("push ") + linha[1]);
+            linha_aux.push_back(string("push ") + linha[2]);
+            linha_aux.push_back(string("CALL LerString "));
+            final->push_back(toUpperCase(linha_aux[0]));
+            final->push_back(linha_aux[1]);
+            final->push_back(linha_aux[2]);
+        }
+    }
+    else if(linha[0] == "S_OUTPUT") { // Ouput string
+        vector<string> linha_aux;
+        // TO DO add no endereço
+        if(linha.size() == 3) {
+            linha[1].pop_back(); // Retirando a vírgula
+            linha_aux.push_back(string("push ") + linha[1]);
+            linha_aux.push_back(string("push ") + linha[2]);
+            linha_aux.push_back(string("CALL EscreverString "));
+            final->push_back(toUpperCase(linha_aux[0]));
+            final->push_back(linha_aux[1]);
+            final->push_back(linha_aux[2]);
+        }
+    }
+    /******************************/
 
 
 }
