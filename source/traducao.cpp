@@ -27,6 +27,7 @@ void print_traducao(vector<string> traducao, string nome_arquivo, vector<string>
         palavras_bss = split(linha, ' ', '\t');
         palavras_bss[0].pop_back(); // Retirando :
         saida << palavras_bss[0] + " RESB " + palavras_bss[2] << endl; 
+        saida << "aux resb 12\n aux_size EQU 12" << endl;
     }
 
     saida << endl;
@@ -274,23 +275,27 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
     /* Input e Output de Inteiro */
     else if(linha[0] == "INPUT") { // Input Inteiro
         vector<string> linha_aux;
+        string aux_acumulador; 
+        aux_acumulador = acumulador;
+        acumulador.pop_back();
+        acumulador.pop_back();
         // TO DO add no endereço
         if(linha.size() == 2) {
-            linha_aux.push_back(string("PUSH ") + linha[1]);
             linha_aux.push_back(string("CALL LerInteiro "));
-            final->push_back(toUpperCase(linha_aux[0]));
-            final->push_back(linha_aux[1]);
+            linha_aux.push_back(string("MOV ") + "["+ linha[1] + "]" + string(", EAX"));
         }
+        final->push_back(linha_aux[0]);
+        final->push_back(linha_aux[1]);
     }
-    else if(linha[0] == "OUTPUT") { // Ouput Inteiro
+    else if(linha[0] == "OUTPUT") { // Output Inteiro
         vector<string> linha_aux;
         // TO DO add no endereço
         if(linha.size() == 2) {
             linha_aux.push_back(string("PUSH ") + linha[1]);
             linha_aux.push_back(string("CALL EscreverInteiro"));
-            final->push_back(toUpperCase(linha_aux[0]));
-            final->push_back(linha_aux[1]);
         }
+        final->push_back(toUpperCase(linha_aux[0]));
+        final->push_back(linha_aux[1]);
     }
     /******************************/
 }
