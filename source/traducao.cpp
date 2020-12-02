@@ -18,6 +18,7 @@ void print_traducao(vector<string> traducao, string nome_arquivo, vector<string>
         palavras_data[0].pop_back(); // Retirando :
         saida << palavras_data[0] + " DD " + palavras_data[2] << endl; 
     }
+    saida << "msg_inicial dd \"Foram lidos \" \nmsg_final db  \" caracteres \", 0dH" << endl;
     
     saida << endl;
     /* Section Bss */
@@ -228,8 +229,12 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
         if(linha.size() == 2) {
             linha_aux.push_back(string("PUSH ") + linha[1]);
             linha_aux.push_back(string("CALL LerChar "));
+            linha_aux.push_back(string("MOV EAX, 1 "));
+            linha_aux.push_back(string("CALL EscreveMensagem "));
             final->push_back(toUpperCase(linha_aux[0]));
             final->push_back(linha_aux[1]);
+            final->push_back(toUpperCase(linha_aux[2]));
+            final->push_back(linha_aux[3]);
         }
     }
     else if(linha[0] == "C_OUTPUT") { // Ouput Char
@@ -253,9 +258,11 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
             linha_aux.push_back(string("PUSH ") + linha[1]);
             linha_aux.push_back(string("PUSH DWORD ") + linha[2]);
             linha_aux.push_back(string("CALL LerString "));
+            linha_aux.push_back(string("CALL EscreveMensagem "));
             final->push_back(toUpperCase(linha_aux[0]));
             final->push_back(linha_aux[1]);
             final->push_back(linha_aux[2]);
+            final->push_back(linha_aux[3]);
         }
     }
     else if(toUpperCase(linha[0]) == "S_OUTPUT") { // Ouput string
@@ -282,11 +289,13 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
         acumulador.pop_back();
         // TO DO add no endereço
         if(linha.size() == 2) {
+            linha_aux.push_back(string("push ") + linha[1]);
             linha_aux.push_back(string("CALL LerInteiro "));
-            linha_aux.push_back(string("MOV ") + "["+ linha[1] + "]" + string(", EAX"));
+            linha_aux.push_back(string("CALL EscreveMensagem "));
         }
         final->push_back(linha_aux[0]);
         final->push_back(linha_aux[1]);
+        final->push_back(linha_aux[2]);
     }
     else if(linha[0] == "OUTPUT") { // Output Inteiro
         vector<string> linha_aux;
