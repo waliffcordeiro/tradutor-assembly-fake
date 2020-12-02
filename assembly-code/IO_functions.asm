@@ -1,3 +1,21 @@
+EscreveMensagem:
+  enter 0,0
+
+  push msg_inicial
+  push 12
+  call EscreverString
+
+  push eax
+  call EscreverInteiro
+
+  push msg_final
+  push 12
+  call EscreverString
+
+
+  leave
+  ret
+
 LerChar:
     ENTER 0,0
     PUSHA
@@ -52,16 +70,19 @@ Saida:
     pop ebx
 
     add esp, 4
+    dec eax
     leave
     ret
 
 EscreverString:
     enter 0,0
+    pusha
     mov eax, 4
     mov ebx, 1
     mov ecx, [EBP + 12]
     mov edx, [EBP + 8]
     int 80h
+    popa
     leave
     ret
 
@@ -109,6 +130,9 @@ Leitura_Cont:
   sub eax, [esp]
   add esp, 4
 Leitura_Sinal_Positivo:
+  mov edx, [EBP+8]
+  mov [edx], eax
+  mov eax, ecx ; 
   pop edi
   pop edx
   pop ecx
