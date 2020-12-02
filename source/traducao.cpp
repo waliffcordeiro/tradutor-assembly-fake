@@ -122,14 +122,13 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
     else if(linha[0] == "COPY") {
         linha[1].pop_back(); // retirando a vírgula
         linha_convertida = (string("MOV ") + string("[") + 
-        linha[1] + "]" + string(", ") + "[" + linha[2] + "]");
+        linha[2] + "]" + string(", ") + "[" + linha[1] + "]");
         final->push_back(toUpperCase(linha_convertida));
     }
     /******************************/
 
     /* COPY */
     else if(linha[0] == "LOAD") {
-        string aux_acumulador;
         if(linha.size() == 2) {
             linha_convertida = (string("MOV ") + acumulador + "[" + linha[1] + "]");
         } else {
@@ -192,7 +191,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
     /******************************/
 
     /* MUL */
-    else if(linha[0] == "MUL") {
+    else if(linha[0] == "MULT") {
         vector<string> linha_aux;
         acumulador.pop_back(); // Retirando,
         acumulador.pop_back();
