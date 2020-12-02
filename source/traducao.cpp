@@ -25,10 +25,12 @@ void print_traducao(vector<string> traducao, string nome_arquivo, vector<string>
     vector<string> palavras_bss;
     for(auto linha: *bss) {
         palavras_bss = split(linha, ' ', '\t');
-        palavras_bss[0].pop_back(); // Retirando :
+        if(palavras_bss[0].back() == ':') {
+            palavras_bss[0].pop_back(); // Retirando :
+        }
         saida << palavras_bss[0] + " RESB " + palavras_bss[2] << endl; 
-        saida << "aux resb 12\n aux_size EQU 12" << endl;
     }
+    saida << "aux resb 12\naux_size EQU 12" << endl;
 
     saida << endl;
     /* Section Text */
@@ -244,7 +246,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
     /******************************/
 
     /* Input e Output de string */
-    else if(linha[0] == "S_INPUT") { // Input string
+    else if(toUpperCase(linha[0]) == "S_INPUT") { // Input string
         vector<string> linha_aux;
         // TO DO add no endereço
         if(linha.size() == 3) {
@@ -257,7 +259,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
             final->push_back(linha_aux[2]);
         }
     }
-    else if(linha[0] == "S_OUTPUT") { // Ouput string
+    else if(toUpperCase(linha[0]) == "S_OUTPUT") { // Ouput string
         vector<string> linha_aux;
         // TO DO add no endereço
         if(linha.size() == 3) {
@@ -291,7 +293,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
         vector<string> linha_aux;
         // TO DO add no endereço
         if(linha.size() == 2) {
-            linha_aux.push_back(string("PUSH ") + linha[1]);
+            linha_aux.push_back(string("PUSH DWORD [") + linha[1] + "]");
             linha_aux.push_back(string("CALL EscreverInteiro"));
         }
         final->push_back(toUpperCase(linha_aux[0]));
