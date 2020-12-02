@@ -39,52 +39,20 @@ void print_traducao(vector<string> traducao, string nome_arquivo, vector<string>
     }
 
     saida << endl << endl;
-    saida << input_output();
-}
 
-string input_output() {
-    return (
-        string("LerChar:\n") +
-        string("enter 0,0\n") +
-        string("mov eax, 3 ; Código de leitura \n") +
-        string("mov ebx, 0 ; STDIN\n") +
-        string("mov ecx, [EBP + 8]; Ponteiro baseado na pilha (parâmetro por push)\n") +
-        string("mov edx, 1 ; Tamanho em Bytes\n") +
-        string("int 80h\n") +
-        string("leave\n") +
-        string("ret 4\n\n") +
+    /* Pegando funções assembly de input e output */
 
-        string("EscreverChar:\n") +
-        string("enter 0,0\n") +
-        string("mov eax, 4 ; Código de escrita\n") +
-        string("mov ebx, 1\n") +
-        string("mov ecx, [EBP + 8]; Ponteiro baseado na pilha (parâmetro por push)\n") +
-        string("mov edx, 1 ; Tamanho em Bytes\n") + 
-        string("int 80h\n") +
-        string("leave\n") +
-        string("ret 4\n\n") +
+    ifstream funcoes("assembly-code/IO_functions.asm");
+    string linha;
 
-        string("LerString:\n") +
-        string("enter 0,0\n") +
-        string("mov eax, 3\n") +
-        string("mov ebx, 0\n") +
-        string("mov ecx, [EBP + 12]\n") +
-        string("mov edx, [EBP + 8]\n") +
-        string("int 80h\n") +
-        string("leave\n") +
-        string("ret 8\n\n") +
-
-        string("EscreverString:\n") +
-        string("enter 0,0\n") +
-        string("mov eax, 4\n") +
-        string("mov ebx, 1\n") +
-        string("mov ecx, [EBP + 12]\n") +
-        string("mov edx, [EBP + 8]\n") +
-        string("int 80h\n") +
-        string("leave\n") +
-        string("ret 8")
-    
-    );
+    if (!funcoes) {
+        cout << "Erro ao abrir o arquivo com as funções de IO." << endl;
+        exit(1);
+    }
+    while(getline(funcoes, linha)) {
+        saida << linha;
+        saida << endl;
+    }
 }
 
 vector<string> traducao(vector<string> *text) {
@@ -134,11 +102,14 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
 
     /* STORE */
     else if (linha[0] == "STORE") {
+        string aux_acumulador = acumulador;
+        aux_acumulador.pop_back();
+        aux_acumulador.pop_back();
         if(linha.size() == 2) {
-            linha_convertida = (string("MOV ") + acumulador + string("[") + linha[1] + string("]"));
+            linha_convertida = (string("MOV ") + string("[") + linha[1] + string("], ") + aux_acumulador);
         } else {
-            linha_convertida = (string("MOV ") + acumulador + string("[") + 
-            linha[1] + linha[2] + linha[3] + string("]"));
+            linha_convertida = (string("MOV ") + string("[") + 
+            linha[1] + linha[2] + linha[3] + string("], ") + aux_acumulador);
         }
         final->push_back(toUpperCase(linha_convertida));
     }
@@ -155,6 +126,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
 
     /* COPY */
     else if(linha[0] == "LOAD") {
+        string aux_acumulador;
         if(linha.size() == 2) {
             linha_convertida = (string("MOV ") + acumulador + "[" + linha[1] + "]");
         } else {
@@ -205,12 +177,14 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
         vector<string> linha_aux;
         acumulador.pop_back();
         acumulador.pop_back();
-        linha_aux.push_back(string("MOV EAX, ") + string("[") + linha[1] + string("]"));
+        linha_aux.push_back(string("MOV EAX, ") + acumulador);
         linha_aux.push_back(string("CDQ"));
-        linha_aux.push_back(string("IDIV ") + acumulador);
+        linha_aux.push_back(string("IDIV DWORD ") + string("[") + linha[1] + string("]"));
+        linha_aux.push_back(string("MOV ") + acumulador + string(", EAX"));
         final->push_back(toUpperCase(linha_aux[0]));
         final->push_back(toUpperCase(linha_aux[1]));
         final->push_back(toUpperCase(linha_aux[2]));
+        final->push_back(toUpperCase(linha_aux[3]));
     }
     /******************************/
 
@@ -224,10 +198,11 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
         // linha_aux.push_back(string("MOV EDX, 0"));
 
         linha_aux.push_back(string("MOV EAX, ") + string("[") + linha[1] + string("]"));
-        linha_aux.push_back(string("IMUL ") + acumulador);
-        
+        linha_aux.push_back(string("IMUL DWORD ") + acumulador);
+        linha_aux.push_back(string("MOV ") + acumulador + string(", EAX"));
         final->push_back(toUpperCase(linha_aux[0]));
         final->push_back(toUpperCase(linha_aux[1]));
+        final->push_back(toUpperCase(linha_aux[2]));
 
         // TO DO Overflow
     }
@@ -249,7 +224,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
         vector<string> linha_aux;
         // TO DO add no endereço
         if(linha.size() == 2) {
-            linha_aux.push_back(string("push ") + linha[1]);
+            linha_aux.push_back(string("PUSH ") + linha[1]);
             linha_aux.push_back(string("CALL LerChar "));
             final->push_back(toUpperCase(linha_aux[0]));
             final->push_back(linha_aux[1]);
@@ -259,7 +234,7 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
         vector<string> linha_aux;
         // TO DO add no endereço
         if(linha.size() == 2) {
-            linha_aux.push_back(string("push ") + linha[1]);
+            linha_aux.push_back(string("PUSH ") + linha[1]);
             linha_aux.push_back(string("CALL EscreverChar "));
             final->push_back(toUpperCase(linha_aux[0]));
             final->push_back(linha_aux[1]);
@@ -273,8 +248,8 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
         // TO DO add no endereço
         if(linha.size() == 3) {
             linha[1].pop_back(); // Retirando a vírgula
-            linha_aux.push_back(string("push ") + linha[1]);
-            linha_aux.push_back(string("push ") + linha[2]);
+            linha_aux.push_back(string("PUSH ") + linha[1]);
+            linha_aux.push_back(string("PUSH DWORD ") + linha[2]);
             linha_aux.push_back(string("CALL LerString "));
             final->push_back(toUpperCase(linha_aux[0]));
             final->push_back(linha_aux[1]);
@@ -286,8 +261,8 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
         // TO DO add no endereço
         if(linha.size() == 3) {
             linha[1].pop_back(); // Retirando a vírgula
-            linha_aux.push_back(string("push ") + linha[1]);
-            linha_aux.push_back(string("push ") + linha[2]);
+            linha_aux.push_back(string("PUSH ") + linha[1]);
+            linha_aux.push_back(string("PUSH DWORD ") + linha[2]);
             linha_aux.push_back(string("CALL EscreverString "));
             final->push_back(toUpperCase(linha_aux[0]));
             final->push_back(linha_aux[1]);
@@ -296,5 +271,27 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
     }
     /******************************/
 
-
+    /* Input e Output de Inteiro */
+    else if(linha[0] == "INPUT") { // Input Inteiro
+        vector<string> linha_aux;
+        // TO DO add no endereço
+        if(linha.size() == 2) {
+            linha_aux.push_back(string("PUSH ") + linha[1]);
+            linha_aux.push_back(string("CALL LerInteiro "));
+            final->push_back(toUpperCase(linha_aux[0]));
+            final->push_back(linha_aux[1]);
+        }
+    }
+    else if(linha[0] == "OUTPUT") { // Ouput Inteiro
+        vector<string> linha_aux;
+        // TO DO add no endereço
+        if(linha.size() == 2) {
+            linha_aux.push_back(string("PUSH ") + linha[1]);
+            linha_aux.push_back(string("CALL EscreverInteiro"));
+            final->push_back(toUpperCase(linha_aux[0]));
+            final->push_back(linha_aux[1]);
+        }
+    }
+    /******************************/
 }
+
