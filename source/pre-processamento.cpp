@@ -28,7 +28,7 @@ string pre_processamento(string file, vector<string> *text, vector<string> *bss,
             }
 
             // Separa todos os tokens em um vector de string retirando espaços e tabulações
-            tokens = split(linha, ' ', '\t');
+            tokens = split(toUpperCase(linha), ' ', '\t');
             
             if(tokens.size() > 6) { // copy com muitos argumentos
                 Linha *linhaObj = new Linha("", "", "", "");
@@ -350,7 +350,7 @@ string pre_processamento(string file, vector<string> *text, vector<string> *bss,
                 if (it_linha->operador2 != "") {
                     palavra += it_linha->operador2 + " ";
                 }
-                text->push_back(palavra);
+                text->push_back(toUpperCase(palavra));
             }
         }
         /**************************************/
