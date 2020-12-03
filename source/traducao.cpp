@@ -78,6 +78,10 @@ void metodo_equivalente(vector<string> linha, vector<string> *final) {
     string linha_convertida;
     string acumulador = string("EBX, ");
 
+    if(linha[0].back() == ':') { // Verificando se é label
+        final->push_back(linha[0]);
+        linha.erase(linha.begin());
+    }
     /* ADD */
     if(linha[0] == "ADD") {
         if(linha.size() == 2)
