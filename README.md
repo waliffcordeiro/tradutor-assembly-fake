@@ -6,6 +6,7 @@ hipotética de sala de aula, seguindo a especificação do trabalho e retornar u
 ____
 ## Compilar e Traduzir
 make
+
 ./tradutor nome_arquivo.asm
 ____
 ## Montar
